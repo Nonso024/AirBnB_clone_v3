@@ -24,10 +24,10 @@ def not_found(e):
     return make_response(jsonify({"error": "Not found"}), 404)
 
 
-if __name__ = "__main__":
+if __name__ == "__main__":
     environ_host = os.getenv("HBNB_API_HOST")
     environ_port = os.getenv("HBNB_API_PORT")
 
-    app.run(host=environ_host if environ_host else "0.0.0.0",
-            port=environ_port if environ_port else 5000,
-            threaded=True
+    app.run(host=environ_host if environ_host else "0.0.0.0"),
+    port=environ_port if environ_port else 5000,
+    threaded=True
