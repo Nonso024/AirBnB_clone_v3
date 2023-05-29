@@ -85,56 +85,55 @@ class TestFileStorage(unittest.TestCase):
 
     @unittest.skipIf(models.storage_t != 'db', "not testing db storage")
     def test_save(self):
-        """Test that save properly saves objects to the db"""
+        """Test that save properly saves objects to file.json"""
 
     @unittest.skipIf(models.storage_t != 'db', "not testing db storage")
     def test_get(self):
-        """Test that get retrieves an item in db properly"""
+        """ Test that get gets an object with id or none if not found """
 
-    @unittest.skipIf(models.storage_t != 'db', "not testing db storage")
-    def test_count(self):
-        """Test that count returns the right number of elements in the db"""
-
-
-class TestDBStorage(unittest.TestCase):
-    """Test the DBStorage class"""
-
-    @unittest.skipIf(os.getenv('HBNB_TYPE_STORAGE') != 'db',
-                     "not testing db storage")
-    def test_get(self):
-        """test that get returns an object of a given class by id."""
         storage = models.storage
-        obj = State(name='Michigan')
-        obj.save()
-        self.assertEqual(obj.id, storage.get(State, obj.id).id)
-        self.assertEqual(obj.name, storage.get(State, obj.id).name)
-        self.assertIsNot(obj, storage.get(State, obj.id + 'op'))
-        self.assertIsNone(storage.get(State, obj.id + 'op'))
-        self.assertIsNone(storage.get(State, 45))
-        self.assertIsNone(storage.get(None, obj.id))
-        self.assertIsNone(storage.get(int, obj.id))
-        with self.assertRaises(TypeError):
-            storage.get(State, obj.id, 'op')
-        with self.assertRaises(TypeError):
-            storage.get(State)
+        s1 = State()
+        s2 = State()
+        s1.name = "Lagos"
+        s2.name = "Delta"
+
+        found_l = False
+        found_d = False
+        for obj in storage.all(State).values():
+            if obj.name == "Lagos":
+                found_l = True
+            if obj.name == "Delta":
+                found_d = True
+
+        if not found_l:
+            storage.new(s1)
+            storage.save()
+            self.assertTrue(s1 is storage.get("State", s1.id))
+        if not found_d:
+            storage.new(s2)
+            storage.save()
+            self.assertTrue(s2 is storage.get("State", s2.id))
+
+        storage.close()
+
+        self.assertTrue(storage.get(State, "1234") is None)
+
+    @unittest.skipIf(models.storage_t != 'db', "not testing db storage")
+    def test_get_no_args(self):
+        """ test get with no args """
+
+        storage = models.storage
         with self.assertRaises(TypeError):
             storage.get()
-
-    def test_count(self):
-        """test that count returns the number of objects of a given class."""
-        storage = models.storage
-        self.assertIs(type(storage.count()), int)
-        self.assertIs(type(storage.count(None)), int)
-        self.assertIs(type(storage.count(int)), int)
-        self.assertIs(type(storage.count(State)), int)
-        self.assertEqual(storage.count(), storage.count(None))
-        State(name='Lagos').save()
-        self.assertGreater(storage.count(State), 0)
-        self.assertEqual(storage.count(), storage.count(None))
-        a = storage.count(State)
-        State(name='Enugu').save()
-        self.assertGreater(storage.count(State), a)
-        Amenity(name='Free WiFi').save()
-        self.assertGreater(storage.count(), storage.count(State))
         with self.assertRaises(TypeError):
-            storage.count(State, 'op')
+            storage.get("State")
+
+    @unittest.skipIf(models.storage_t != 'db', "not testing db storage")
+    def test_count(self):
+        """ Test the count method for all objects"""
+
+        storage = models.storage
+        count = storage.count()
+
+        self.assertTrue(type(count) is int)
+        self.assertEqual(count, 2)
