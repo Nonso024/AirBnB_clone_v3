@@ -55,7 +55,7 @@ class FileStorage:
                 jo = json.load(f)
             for key in jo:
                 self.__objects[key] = classes[jo[key]["__class__"]](**jo[key])
-        except Exception:
+        except:
             pass
 
     def delete(self, obj=None):
@@ -70,26 +70,26 @@ class FileStorage:
         self.reload()
 
     def get(self, cls, id):
-        """ returns objct based on class and ID, or NONE is not found """
-        if cls not in classes.values():
-            return None
+        """ returns a given object based on cls and id """
 
-        all_cls = models.storage.all(cls)
-        for value in all_cls.values():
-            if (value.id == id):
-                return value
+        if type(cls) is str:
+            cls = eval(cls)
+        objs = self.all(cls)
+
+        for obj in objs.values():
+            if obj.id == id:
+                return obj
 
         return None
 
     def count(self, cls=None):
-        """ counts the number of objects in storage """
-        all_class = classes.values()
+        """ returns the number of objects in storage """
 
-        if not cls:
-            count = 0
-            for item in all_class:
-                count += len(models.storage.all(item).values())
+        if cls:
+            if type(cls) is str:
+                cls = eval(cls)
+            objs = self.all(cls)
         else:
-            count = len(models.storage.all(cls).values())
+            objs = self.all()
 
-        return count
+        return(len(objs))
