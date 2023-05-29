@@ -6,14 +6,14 @@ from models import storage
 
 
 @app_views.route("/status", strict_slashes=False)
-def hbnbStatus():
+def status():
     """ configures the status route """
 
     return jsonify({"status": "ok"})
 
 
 @app_views.route("/stats", strict_slashes=False)
-def hbnbStats():
+def stats():
     """ return the stats of objects """
 
     models = {
