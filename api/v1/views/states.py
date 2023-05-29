@@ -21,13 +21,15 @@ def states():
         except Exception:
             abort(400, "Not a JSON")
 
+        if not json_dict:
+            abort(400, "Not a JSON")
+
         try:
             name = json_dict["name"]
         except KeyError:
             abort(400, "Missing name")
 
-        new_state = State()
-        new_state.name = name
+        new_state = State(**json_dict)
 
         storage.new(new_state)
         storage.save()
@@ -35,7 +37,7 @@ def states():
         return jsonify(new_state.to_dict()), 201
 
 
-@app_views.route("/states/<state_id>", methods=["GET", "DELETE", "PUT"]
+@app_views.route("/states/<state_id>", methods=["GET", "DELETE", "PUT"],
                  strict_slashes=False)
 def states_id(state_id):
     """ configures the states/<state_id> route """
@@ -58,12 +60,14 @@ def states_id(state_id):
         except Exception:
             abort(400, "Not a JSON")
 
+        if not json_dict:
+            abort(400, "Not a JSON")
+
         keys_to_ignore = ["id", "created_at", "updated_at"]
+        state_dict = state.to_dict()
         for key, val in json_dict.items():
-            if key not in keys_to_ignore:
+            if key not in keys_to_ignore and key in state_dict:
                 setattr(state, key, val)
 
-        storage.new(state)
         storage.save()
-
         return jsonify(state.to_dict()), 200

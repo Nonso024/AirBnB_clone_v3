@@ -21,6 +21,9 @@ def users():
         except Exception:
             abort(400, "Not a JSON")
 
+        if not json_dict:
+            abort(400, "Not a JSON")
+
         try:
             email = json_dict["email"]
         except KeyError:
@@ -31,11 +34,7 @@ def users():
         except KeyError:
             abort(400, "Missing password")
 
-        new_user = User()
-        new_user.email = email
-        new_user.password = password
-        new_user.first_name = json_dict.get("first_name")
-        new_user.last_name = json_dict.get("last_name")
+        new_user = User(**json_dict)
 
         storage.new(new_user)
         storage.save()
@@ -66,12 +65,13 @@ def users_id(user_id):
         except Exception:
             abort(400, "Not a JSON")
 
+        if not json_dict:
+            abort(400, "Not a JSON")
+
         keys_to_ignore = ["id", "email", "created_at", "updated_at"]
         for key, val in json_dict.items():
             if key not in keys_to_ignore:
                 setattr(user, key, val)
 
-        storage.new(user)
         storage.save()
-
         return jsonify(user.to_dict()), 200
